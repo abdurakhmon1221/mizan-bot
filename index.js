@@ -2,6 +2,7 @@ import { Telegraf, Markup } from 'telegraf';
 import { GoogleGenAI } from '@google/genai';
 import Groq from 'groq-sdk';
 import dotenv from 'dotenv';
+import http from 'http';
 
 dotenv.config();
 
@@ -345,6 +346,13 @@ bot.on('contact', async (ctx) => {
     } catch (e) { console.error("Admin xato:", e.message); }
   }
 });
+
+// ===== Health-check HTTP server (Koyeb / Render uchun) =====
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ status: 'ok', bot: 'Mizan Bot', uptime: process.uptime() }));
+}).listen(PORT, () => console.log(`🌐 Health-check: http://localhost:${PORT}`));
 
 // ===== Ishga tushirish =====
 const provider = groq ? 'Groq (Llama 3.3)' : 'Gemini';
