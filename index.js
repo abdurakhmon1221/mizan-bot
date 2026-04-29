@@ -88,7 +88,16 @@ const DEFAULT_KEYBOARD = [['📱 SMM', '🎯 Target'], ['🎬 Montaj', '🎨 Log
 // ===== JSON parse =====
 function parseAI(raw) {
   try {
-    const cleaned = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+    // Markdown code bloklarini tozala
+    let cleaned = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+
+    // JSON boshlanishini va oxirini top (matn + JSON aralash kelsa)
+    const start = cleaned.indexOf('{');
+    const end   = cleaned.lastIndexOf('}');
+    if (start !== -1 && end !== -1 && end > start) {
+      cleaned = cleaned.slice(start, end + 1);
+    }
+
     const p = JSON.parse(cleaned);
     return {
       reply:          typeof p.reply === 'string' ? p.reply.trim() : raw.trim(),
@@ -96,6 +105,7 @@ function parseAI(raw) {
       keyboard:       Array.isArray(p.keyboard) && p.keyboard.length ? p.keyboard : DEFAULT_KEYBOARD,
     };
   } catch {
+    // JSON yo'q bo'lsa — xom matnni to'g'ridan-to'g'ri javob sifatida ishlat
     return { reply: raw.trim(), inline_buttons: [], keyboard: DEFAULT_KEYBOARD };
   }
 }
